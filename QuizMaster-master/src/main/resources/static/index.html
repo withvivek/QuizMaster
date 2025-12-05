@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>QuizMaster - Professional Quiz App</title>
+	<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+			rel="stylesheet">
+	<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+			rel="stylesheet">
+	<script
+			src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+	<style>
+		body {
+            background: linear-gradient(135deg, #f0f5ff, #dce8ff);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .app-shell {
+            max-width: 600px;
+            margin: 40px auto;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .card-quiz {
+            border-radius: 18px;
+            border: none;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s ease;
+        }
+
+        .card-quiz:hover {
+            transform: scale(1.02);
+        }
+
+        .header-bar {
+            background: linear-gradient(90deg, #004aad, #007bff);
+            color: white;
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .header-bar h5 {
+            font-weight: 600;
+        }
+
+        #logoutBtn {
+          border-radius: 8px;
+          font-weight: 500;
+          transition: 0.3s;
+        }
+
+        #logoutBtn:hover {
+          background-color: rgba(255,255,255,0.2);
+          color: #fff;
+        }
+
+
+
+        .list-group-item {
+            border: none;
+            border-radius: 12px !important;
+            margin-bottom: 10px;
+            background: #f8faff;
+            transition: 0.3s;
+        }
+
+        .list-group-item:hover {
+            background: #e8f0ff;
+            transform: translateY(-3px);
+        }
+
+        .quiz-icon {
+            font-size: 22px;
+            margin-right: 10px;
+            color: #007bff;
+        }
+
+        .option-btn {
+            text-align: left;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .option-btn:hover {
+            background-color: #e9f2ff;
+        }
+
+        .option-btn.active {
+            background: linear-gradient(90deg, #0d6efd, #007bff);
+            color: white;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(90deg, #0d6efd, #007bff);
+            border: none;
+            color: white;
+        }
+
+        .btn-gradient:hover {
+            background: linear-gradient(90deg, #0056d2, #004aad);
+        }
+
+        .result-circle {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            background: radial-gradient(circle at top left, #007bff, #004aad);
+            color: white;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes fadeIn {from { opacity:0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        }
+	</style>
+</head>
+<body>
+<div class="app-shell">
+	<!-- Home Page -->
+	<div id="page-home" class="card card-body card-quiz">
+		<div
+				class="header-bar mb-3 d-flex align-items-center justify-content-between">
+			<h5 class="mb-0">
+				<i class="bi bi-lightning-charge-fill"></i> QuizMaster
+			</h5>
+			<div class="d-flex align-items-center">
+  <span id="user-info" class="btn bg-light text-primary fw-bold me-2">
+    <i class="bi bi-person-badge"></i> <span id="username-display">User</span>
+  </span>
+				<button id="logoutBtn" class="btn btn-outline-light btn-sm">
+					<i class="bi bi-box-arrow-right"></i> Logout
+				</button>
+			</div>
+
+		</div>
+		<div class="text-center mb-3">
+			<h6 class="fw-semibold">Challenge Yourself!</h6>
+			<p class="text-muted small">Choose a topic and test your skills
+				with fun interactive quizzes.</p>
+		</div>
+		<div id="quiz-list" class="list-group"></div>
+	</div>
+
+	<!-- Quiz Page -->
+	<div id="page-quiz" class="card card-body card-quiz d-none">
+		<div class="d-flex align-items-center mb-3">
+			<button id="backToHome" class="btn btn-link text-decoration-none">
+				<i class="bi bi-arrow-left"></i> Back
+			</button>
+			<div class="ms-auto text-end">
+				<div id="progressText" class="small text-muted mb-1">1 / 10</div>
+				<div class="progress" style="width: 120px">
+					<div id="progressBar" class="progress-bar bg-primary"
+						 role="progressbar" style="width: 0%"></div>
+				</div>
+			</div>
+		</div>
+		<h5 id="quiz-title" class="mb-1 text-primary fw-semibold">Quiz
+			Title</h5>
+		<small id="quiz-sub" class="text-muted mb-3 d-block">0
+			Questions</small>
+		<div id="question-card" class="my-3"></div>
+		<div class="d-flex justify-content-between">
+			<button id="prevBtn" class="btn btn-outline-primary">
+				<i class="bi bi-arrow-left-circle"></i> Previous
+			</button>
+			<button id="nextBtn" class="btn btn-gradient">
+				Next <i class="bi bi-arrow-right-circle"></i>
+			</button>
+		</div>
+	</div>
+
+	<!-- Result Page -->
+	<div id="page-result"
+		 class="card card-body card-quiz  d-none text-center">
+		<i class="bi bi-trophy-fill text-warning" style="font-size: 48px;"></i>
+		<h5 class="mt-2 fw-semibold">Congratulations!</h5>
+		<p class="text-muted">You've completed the quiz.</p>
+		<div class="result-circle mb-3">
+			<div>
+				<div id="score-main" style="font-size: 34px; font-weight: 700">0/0</div>
+				<small>Score</small>
+			</div>
+		</div>
+		<canvas id="resultChart" width="220" height="220"></canvas>
+		<div class="mt-3">
+			<button id="shareBtn" class="btn btn-gradient mb-2">
+				<i class="bi bi-share"></i> Share
+			</button>
+			<button id="backHomeBtn" class="btn btn-outline-primary mb-2">
+				<i class="bi bi-house"></i> Back to Home
+			</button>
+		</div>
+	</div>
+</div>
+
+<script>
+	// ✅ Backend API routes
+    const api = {
+      list: '/api/quizzes',  // returns all questions with category field
+      questions: category => `/api/quizzes/questions/${category}`,
+      submit: '/api/quizzes/submit'
+    };
+
+    let quizzes = [], questions = [], answers = {}, currentQuiz = null, currentIndex = 0;
+
+    // ✅ DOM references
+    const home = document.getElementById('page-home'),
+          quiz = document.getElementById('page-quiz'),
+          result = document.getElementById('page-result'),
+          quizList = document.getElementById('quiz-list'),
+          quizTitle = document.getElementById('quiz-title'),
+          quizSub = document.getElementById('quiz-sub'),
+          questionCard = document.getElementById('question-card'),
+          prev = document.getElementById('prevBtn'),
+          next = document.getElementById('nextBtn'),
+          progress = document.getElementById('progressBar'),
+          progressText = document.getElementById('progressText'),
+          backHome = document.getElementById('backToHome'),
+          score = document.getElementById('score-main'),
+          backBtn = document.getElementById('backHomeBtn'),
+          shareBtn = document.getElementById('shareBtn');
+
+    // ✅ Event bindings
+    // ✅ Display username at the top (from login)
+  document.addEventListener('DOMContentLoaded', () => {
+    const username = localStorage.getItem('username') || 'Guest';
+    document.getElementById('username-display').textContent = username;
+  });
+
+    document.addEventListener('DOMContentLoaded', loadQuizzes);
+    backHome.onclick = () => show('home');
+    backBtn.onclick = () => show('home');
+    prev.onclick = () => { if (currentIndex > 0) { currentIndex--; render(); } };
+    next.onclick = () => { if (currentIndex < questions.length - 1) { currentIndex++; render(); } else submit(); };
+    shareBtn.onclick = share;
+
+  //✅ Logout button handler
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      if (confirm("Are you sure you want to logout?")) {
+        localStorage.removeItem('username');
+        alert("You have been logged out.");
+        window.location.href = "login.html"; // redirect to login page (if exists)
+        // or reload current page if no login.html:
+        // location.reload();
+      }
+    });
+
+
+    // ✅ Load quizzes (categories)
+    async function loadQuizzes() {
+      try {
+        const res = await fetch(api.list);
+        if (!res.ok) throw new Error('Failed to fetch quizzes');
+        const data = await res.json();
+
+        // Extract unique categories
+        const categories = [...new Set(data.map(q => q.category))];
+        quizList.innerHTML = '';
+
+        categories.forEach(cat => {
+          quizList.innerHTML += `
+            <div class='list-group-item d-flex align-items-center justify-content-between'>
+              <div>
+                <div class='fw-bold text-primary'>
+                  <i class="bi bi-journal-code quiz-icon"></i> ${cat}
+                </div>
+                <small class='text-muted'>Quiz on ${cat}</small>
+              </div>
+              <button class='btn btn-gradient btn-sm start' data-category='${cat}'>Start</button>
+            </div>`;
+        });
+
+        document.querySelectorAll('.start').forEach(btn => {
+          btn.addEventListener('click', e => start(e.target.dataset.category));
+        });
+
+      } catch (err) {
+        console.error('Error loading quizzes', err);
+        quizList.innerHTML = "<div class='text-center text-muted'>Unable to load quizzes</div>";
+      }
+    }
+
+    // ✅ Start quiz by category
+    async function start(category) {
+      currentQuiz = { title: category };
+      show('quiz');
+      quizTitle.textContent = `${category} Quiz`;
+      quizSub.textContent = 'Multiple Questions';
+      questionCard.innerHTML = `
+        <div class="text-center p-4">
+          <div class="spinner-border text-primary" role="status"></div>
+        </div>`;
+
+      try {
+        const res = await fetch(api.questions(category));
+        if (!res.ok) throw new Error('Failed to load questions');
+        questions = await res.json();
+      } catch (err) {
+        console.warn('Using fallback questions', err);
+        questions = [];
+      }
+
+      currentIndex = 0;
+      answers = {};
+      render();
+    }
+
+
+    function escapeHTML(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+    // ✅ Render a single question
+    function render() {
+      const q = questions[currentIndex];
+      if (!q) return;
+
+      let opts = '';
+      // The backend should send option1–4
+     ['option1', 'option2', 'option3', 'option4'].forEach((optKey) => {
+    if (q[optKey]) {
+      opts += `
+        <button class='btn option-btn btn-light mb-2 w-100'
+          data-q='${q.id}' data-o='${optKey}'>
+          ${escapeHTML(q[optKey])}
+        </button>`;
+    }
+  });
+
+
+      questionCard.innerHTML = `
+        <div>
+          <div class='small text-muted mb-2'>Question ${currentIndex + 1}/${questions.length}</div>
+          <h6>${q.questiontitle}</h6>
+          ${opts}
+        </div>`;
+
+      document.querySelectorAll('.option-btn').forEach(b =>
+        b.addEventListener('click', e => {
+          answers[q.id] = e.target.dataset.o;
+          document.querySelectorAll('.option-btn').forEach(x => x.classList.remove('active'));
+          e.target.classList.add('active');
+        })
+      );
+
+      progressText.textContent = `${currentIndex + 1} / ${questions.length}`;
+      progress.style.width = ((currentIndex + 1) / questions.length * 100) + '%';
+      prev.disabled = currentIndex === 0;
+      next.textContent = currentIndex === questions.length - 1 ? 'Submit' : 'Next';
+    }
+
+    // ✅ Submit quiz and calculate locally
+    async function submit() {
+      let correct = 0;
+      questions.forEach(q => {
+        const selected = answers[q.id];
+        if (selected && q[selected] === q.rightAnswer) correct++;
+      });
+      showResult(correct, questions.length);
+    }
+
+    // ✅ Show result page
+    function showResult(correct, total) {
+      show('result');
+      score.textContent = `${correct}/${total}`;
+      const wrong = total - correct;
+      const ctx = document.getElementById('resultChart').getContext('2d');
+      if (window.chart) window.chart.destroy();
+      window.chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Correct', 'Wrong'],
+          datasets: [{
+            data: [correct, wrong],
+            backgroundColor: ['#007bff', '#dee2e6'],
+            borderWidth: 0
+          }]
+        },
+        options: { plugins: { legend: { position: 'bottom' } } }
+      });
+    }
+
+    // ✅ Show page handler
+    function show(p) {
+      home.classList.add('d-none');
+      quiz.classList.add('d-none');
+      result.classList.add('d-none');
+      if (p === 'home') home.classList.remove('d-none');
+      if (p === 'quiz') quiz.classList.remove('d-none');
+      if (p === 'result') result.classList.remove('d-none');
+    }
+
+    // ✅ Share score
+    function share() {
+      if (navigator.share)
+        navigator.share({ title: 'Quiz Score', text: `I scored ${score.textContent}!` });
+      else alert('Score: ' + score.textContent);
+    }
+</script>
+
+<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
